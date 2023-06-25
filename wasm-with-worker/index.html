@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>WASM With Web Worker</title>
+  </head>
+  <body>
+    <h1>WASM With Web Worker</h1>
+    <input id="a" type="text" placeholder="First number" />
+    <span>+</span>
+    <input id="b" type="text" placeholder="Second number" />
+    <span>=</span>
+    <input
+      id="result"
+      type="text"
+      readonly
+      placeholder="Here shows the result (from Worker)"
+    />
+    <div><button id="submit">Caculate</button></div>
+    <script>
+      if (window.Worker) {
+        const myWorker = new Worker("worker.js");
+        document.querySelector("#submit").addEventListener("click", () => {
+          const a = document.querySelector("#a").value;
+          const b = document.querySelector("#b").value;
+          myWorker.postMessage({
+            type: "excute",
+            params: {
+              functionName: "add",
+              arguments: [Number(a), Number(b)],
+            },
+          });
+        });
+
+        myWorker.onmessage = function (e) {
+          console.log("Message received from worker", e);
+          const { params, result } = e.data;
+          if (params.functionName === "add") {
+            document.querySelector("#result").value = result;
+          }
+        };
+      } else {
+        console.log("Your browser doesn't support web workers.");
+      }
+    </script>
+  </body>
+</html>
